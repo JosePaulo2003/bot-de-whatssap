@@ -1,7 +1,7 @@
 module.exports = {
   owner: {
     name: 'José (Ayano)',
-    targetNumber: '559284418952@c.us'
+    targetNumber: '(numero aqui)@c.us'
   },
   bot: {
     displayName: 'bot do José (Ayano)',
@@ -56,3 +56,4 @@ module.exports = {
       'Boa noite, meu bem. Que o seu descanso seja tranquilo e que, antes de dormir, você sinta o abraço que te mando em pensamento. 🌙🤍'
   }
 };
+
