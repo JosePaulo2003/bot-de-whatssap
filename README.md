@@ -28,7 +28,7 @@ Na primeira execução o bot vai abrir uma sessão do WhatsApp Web controlada pe
 
 ## 2. Instalação
 
-Dentro da pasta do projeto (`bot de whatssap - Copia`):
+Dentro da pasta do projeto:
 
 ```bash
 npm install
@@ -205,3 +205,4 @@ Para adaptar este bot para outro uso:
    - As seções de tratamento de cada opção (1–7) em `index.js`.
 
 Com essas alterações, outras pessoas conseguem **trocar todo o estilo do bot apenas editando textos**, sem precisar entender profundamente o código.
+
