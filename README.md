@@ -4,7 +4,7 @@ Bot em Node.js usando [`whatsapp-web.js`](https://github.com/JosePaulo2003/whats
 
 - **Menu interativo** (piadas, motivacionais, destino, jogo da velha, status, conquistas)
 - **Criação automática de figurinha** (envie imagem/GIF/vídeo curto)
-- **Mensagens especiais para um número alvo** ("meu amor")
+- **Mensagens especiais para um número alvo** ("pessoa x")
 - **Painel admin web** para acompanhar uso, bloquear usuários e responder manualmente
 
 Este README explica:
@@ -159,7 +159,7 @@ Esses arquivos já estão organizados como listas de textos. Você pode editar l
 ## 6. Pontos onde o `config.js` é usado
 
 - `index.js`
-  - Número alvo (`meuAmor`) vem de `config.owner.targetNumber`.
+  - Número alvo (`pessoa x`) vem de `config.owner.targetNumber`.
   - Mensagem de boas‑vindas automática para novos usuários usa `config.messages.welcomeOthers`.
   - Respostas de `!pausar` / `!voltar` usam `config.messages.pauseReply` e `config.messages.resumeReply`.
   - Mensagem de erro ao digitar opção inválida (fora de 1–7) usa `config.messages.invalidMenuNumber`.
@@ -203,6 +203,3 @@ Para adaptar este bot para outro uso:
    - Texto do menu em `config.menu.caption`.
    - Mapeamento de comandos em `mapearOpcaoMenu` dentro de `index.js`.
    - As seções de tratamento de cada opção (1–7) em `index.js`.
-
-Com essas alterações, outras pessoas conseguem **trocar todo o estilo do bot apenas editando textos**, sem precisar entender profundamente o código.
-
