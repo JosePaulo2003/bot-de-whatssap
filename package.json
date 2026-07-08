@@ -1,0 +1,16 @@
+{
+  "name": "bot-de-whatssap-main",
+  "version": "1.0.0",
+  "description": "Bot pessoal de WhatsApp com menu, piadas, figurinhas, respostas prontas e modo romantico gotico.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "check": "node --check src/index.js && node --check src/panel.js && node --check src/store.js && node --check src/responses.js && node --check src/stickers.js && node --check src/config.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.18",
+    "pino": "^9.5.0",
+    "qrcode-terminal": "^0.12.0",
+    "sharp": "^0.33.5"
+  }
+}
