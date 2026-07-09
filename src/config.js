@@ -7,6 +7,8 @@ module.exports = {
   groupReplyOrMentionOnly: true,
   groupMentionsOnly: false,
   logIgnoredMessages: true,
+  messageReplayGraceSeconds: 30,
+  processedMessageCacheLimit: 800,
   groupMentionAliases: ['bot', 'Bot do Desenvolvedor'],
   specialModeNumber: (process.env.SPECIAL_MODE_NUMBER || '').replace(/\D/g, ''),
   adminTitle: 'Painel do Bot Pessoal',

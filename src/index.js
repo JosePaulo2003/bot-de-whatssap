@@ -27,6 +27,7 @@ let sock = null;
 let reconnecting = false;
 const processedMessages = new Set();
 const sentGroupMessages = new Map();
+const BOT_STARTED_AT = Date.now();
 const RUNTIME_DIR = path.join(__dirname, '..', 'runtime');
 const LOCK_FILE = path.join(RUNTIME_DIR, 'bot.lock');
 
@@ -168,6 +169,44 @@ function logIgnoredMessage(reason, message) {
   });
 }
 
+function getMessageTimestampMs(message) {
+  const timestamp = message?.messageTimestamp;
+  if (!timestamp) return 0;
+
+  let value = timestamp;
+  if (typeof timestamp === 'object') {
+    if (typeof timestamp.toNumber === 'function') {
+      value = timestamp.toNumber();
+    } else if (typeof timestamp.low !== 'undefined') {
+      value = timestamp.low;
+    }
+  }
+
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric <= 0) return 0;
+
+  return numeric > 1000000000000 ? numeric : numeric * 1000;
+}
+
+function isFromPreviousActivation(message) {
+  const timestampMs = getMessageTimestampMs(message);
+  if (!timestampMs) return false;
+
+  const graceMs = Math.max(0, Number(config.messageReplayGraceSeconds || 0)) * 1000;
+  return timestampMs < BOT_STARTED_AT - graceMs;
+}
+
+function messageCacheKey(message) {
+  const id = message?.key?.id;
+  if (!id) return '';
+
+  return [
+    message.key.remoteJid || '',
+    message.key.participant || '',
+    id
+  ].join(':');
+}
+
 function shouldProcessMessage(message) {
   if (!message || !message.key) {
     logIgnoredMessage('sem chave da mensagem', message);
@@ -184,12 +223,17 @@ function shouldProcessMessage(message) {
     return false;
   }
 
-  const isGroup = isGroupJid(message.key.remoteJid);
-
-  if (message.key.fromMe && !isGroup) {
-    logIgnoredMessage('mensagem propria no privado', message);
+  if (isFromPreviousActivation(message)) {
+    logIgnoredMessage('mensagem antiga da ativacao anterior', message);
     return false;
   }
+
+  if (message.key.fromMe) {
+    logIgnoredMessage('mensagem propria', message);
+    return false;
+  }
+
+  const isGroup = isGroupJid(message.key.remoteJid);
 
   if (isGroup) {
     if (config.ignoreGroups) {
@@ -206,14 +250,15 @@ function shouldProcessMessage(message) {
     }
   }
 
-  const id = message.key.id;
-  if (id && processedMessages.has(id)) {
+  const cacheKey = messageCacheKey(message);
+  if (cacheKey && (processedMessages.has(cacheKey) || store.hasProcessedMessage(cacheKey))) {
     logIgnoredMessage('mensagem duplicada', message);
     return false;
   }
-  if (id) {
-    processedMessages.add(id);
-    setTimeout(() => processedMessages.delete(id), 10 * 60 * 1000);
+  if (cacheKey) {
+    processedMessages.add(cacheKey);
+    store.markProcessedMessage(cacheKey, config.processedMessageCacheLimit);
+    setTimeout(() => processedMessages.delete(cacheKey), 10 * 60 * 1000);
   }
 
   return true;
@@ -584,6 +629,12 @@ async function startWhatsApp() {
       ids: messages.map((message) => message.key?.id).filter(Boolean),
       chats: messages.map((message) => message.key?.remoteJid).filter(Boolean)
     });
+
+    if (type !== 'notify') {
+      console.log('[IGNORADA]', { reason: 'evento de sincronizacao antiga', type, count: messages.length });
+      return;
+    }
+
     for (const message of messages) {
       try {
         await handleMessage(message);

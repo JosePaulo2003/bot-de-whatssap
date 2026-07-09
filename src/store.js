@@ -11,6 +11,7 @@ function emptyState() {
     special: {
       girlfriendJids: {}
     },
+    processedMessages: {},
     awaitingNotes: {},
     pendingReplies: [],
     stats: {
@@ -45,6 +46,7 @@ function load() {
       ...(state.special || {})
     };
     state.special.girlfriendJids = state.special.girlfriendJids || {};
+    state.processedMessages = state.processedMessages || {};
     state.awaitingNotes = state.awaitingNotes || {};
     state.pendingReplies = state.pendingReplies || [];
     state.stats = { ...emptyState().stats, ...(state.stats || {}) };
@@ -65,6 +67,29 @@ function touchStats(partial) {
     ...partial,
     lastEventAt: new Date().toISOString()
   };
+  save();
+}
+
+function pruneProcessedMessages(limit = 800) {
+  const entries = Object.entries(state.processedMessages || {});
+  if (entries.length <= limit) return;
+
+  entries
+    .sort((a, b) => new Date(b[1]) - new Date(a[1]))
+    .slice(limit)
+    .forEach(([id]) => {
+      delete state.processedMessages[id];
+    });
+}
+
+function hasProcessedMessage(id) {
+  return !!(id && state.processedMessages && state.processedMessages[id]);
+}
+
+function markProcessedMessage(id, limit) {
+  if (!id) return;
+  state.processedMessages[id] = new Date().toISOString();
+  pruneProcessedMessages(limit);
   save();
 }
 
@@ -325,6 +350,8 @@ module.exports = {
   load,
   save,
   touchStats,
+  hasProcessedMessage,
+  markProcessedMessage,
   getContact,
   recordIncoming,
   incrementCounter,
